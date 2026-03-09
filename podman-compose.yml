@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  sqldb:
+    image: mysql:8.3
+    container_name: kimai_db
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=kimai
+      - MYSQL_USER=kimaiuser
+      - MYSQL_PASSWORD=kimaipassword
+      - MYSQL_ROOT_PASSWORD=changemeplease
+    command: --default-storage-engine=innodb
+    restart: unless-stopped
+
+  kimai:
+    image: kimai/kimai2:apache
+    container_name: kimai
+    volumes:
+      - data:/opt/kimai/var/data
+      - plugins:/opt/kimai/var/plugins
+    ports:
+      - "8001:8001"
+    environment:
+      - ADMINMAIL=admin@kimai.local
+      - ADMINPASS=changemeplease
+      - DATABASE_URL=mysql://kimaiuser:kimaipassword@sqldb/kimai?charset=utf8mb4&serverVersion=8.3.0
+    restart: unless-stopped
+    depends_on:
+      - sqldb
+
+volumes:
+  data:
+  mysql:
+  plugins:
